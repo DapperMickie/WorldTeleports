@@ -17,6 +17,7 @@ import com.mysql.jdbc.Connection;
 import org.bukkit.entity.Player;
 
 public class Main extends JavaPlugin {
+
 	private Connection connection;
 	public String host, database, username, password;
 	public int port;
