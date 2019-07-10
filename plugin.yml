@@ -1,0 +1,16 @@
+name: WorldTeles
+main: com.dapper.worldteles.Main
+version: 1.0 (alpha)
+commands:
+  wtslist:
+    description: List all world teles
+    usage: /<command>
+  wtstele:
+    description: Teleport to one of the world teles
+    usage: /<command> <telename>
+  wtsadd:
+    description: Adds a world tele to the list
+    usage: /<command> <telename>
+  wtsremove:
+    description: Removes a world tele from the list
+    usage: /<command> <telename>
