@@ -1,26 +1,46 @@
 package com.dapper.worldteles.repositories;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.dapper.worldteles.models.WorldTeleportModel;
-import com.mysql.jdbc.PreparedStatement;
+import com.dapper.worldteles.models.WorldTeleportEntity;
+import com.dapper.worldteles.models.WorldTeleportEntity_;
 
-public class WorldTeleportRepository extends BaseRepository<WorldTeleportModel> {
+public class WorldTeleportRepository extends BaseRepository<WorldTeleportEntity> {
+
+	public WorldTeleportRepository(final Connection connection) {
+		super(connection);
+	}
 
 	@Override
-	public WorldTeleportModel Add(WorldTeleportModel item) {
+	public WorldTeleportEntity findByName(final String name) {
 		try {
-			PreparedStatement statement = (PreparedStatement) this.connection
-					.prepareStatement("INSERT INTO worldteles  (Name, X, Y, Z, CreatedBy, World) VALUES (?,?,?,?,?,?)");
-			statement.setString(1, item.Name);
-			statement.setDouble(2, item.X);
-			statement.setDouble(3, item.Y);
-			statement.setDouble(4, item.Z);
-			statement.setString(5, item.CreatedBy);
-			statement.setString(6, item.World);
+			final PreparedStatement stmt = createStatement("SELECT * FROM " + WorldTeleportEntity_.table + " WHERE name = ?");
+			stmt.setString(1, name);
+
+			final ResultSet result = stmt.executeQuery();
+
+			result.next();
+			return convert(result);
+		} catch (SQLException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	@Override
+	public WorldTeleportEntity add(WorldTeleportEntity item) {
+		try {
+			PreparedStatement statement = createStatement("INSERT INTO " + WorldTeleportEntity_.table +" (Name, X, Y, Z, CreatedBy, World) VALUES (?,?,?,?,?,?)");
+			statement.setString(1, item.getName());
+			statement.setDouble(2, item.getX());
+			statement.setDouble(3, item.getY());
+			statement.setDouble(4, item.getZ());
+			statement.setString(5, item.getCreatedBy());
+			statement.setString(6, item.getWorld());
 
 			statement.executeUpdate();
 
@@ -34,10 +54,9 @@ public class WorldTeleportRepository extends BaseRepository<WorldTeleportModel> 
 	}
 
 	@Override
-	public boolean Remove(int id) {
+	public boolean remove(int id) {
 		try {
-			PreparedStatement statement = (PreparedStatement) this.connection
-					.prepareStatement("DELETE FROM worldteles WHERE Id = ?");
+			PreparedStatement statement = createStatement("DELETE FROM worldteles WHERE Id = ?");
 			statement.setInt(1, id);
 
 			statement.executeUpdate();
@@ -51,8 +70,7 @@ public class WorldTeleportRepository extends BaseRepository<WorldTeleportModel> 
 
 	public boolean Remove(String name) {
 		try {
-			PreparedStatement statement = (PreparedStatement) this.connection
-					.prepareStatement("DELETE FROM worldteles WHERE Name = ?");
+			PreparedStatement statement = createStatement("DELETE FROM worldteles WHERE Name = ?");
 			statement.setString(1, name);
 
 			statement.executeUpdate();
@@ -65,25 +83,14 @@ public class WorldTeleportRepository extends BaseRepository<WorldTeleportModel> 
 	}
 
 	@Override
-	public List<WorldTeleportModel> All() {
+	public List<WorldTeleportEntity> all() {
 		try {
-			PreparedStatement statement = (PreparedStatement) this.connection
-					.prepareStatement("SELECT Id, Name, X, Y, Z, CreatedBy, World FROM worldteles");
+			PreparedStatement statement = createStatement("SELECT Id, Name, X, Y, Z, CreatedBy, World FROM worldteles");
 
 			ResultSet results = statement.executeQuery();
-			List<WorldTeleportModel> wtmList = new ArrayList<WorldTeleportModel>();
+			List<WorldTeleportEntity> wtmList = new ArrayList<WorldTeleportEntity>();
 			while (results.next()) {
-				WorldTeleportModel model = new WorldTeleportModel();
-
-				model.Id = results.getInt(1);
-				model.Name = results.getString(2);
-				model.X = results.getDouble(3);
-				model.Y = results.getDouble(4);
-				model.Z = results.getDouble(5);
-				model.CreatedBy = results.getString(6);
-				model.World = results.getString(7);
-
-				wtmList.add(model);
+				wtmList.add(convert(results));
 			}
 
 			return wtmList;
@@ -94,25 +101,14 @@ public class WorldTeleportRepository extends BaseRepository<WorldTeleportModel> 
 		return null;
 	}
 
-	public List<WorldTeleportModel> GetForUser(String createdBy) {
+	public List<WorldTeleportEntity> GetForUser(String createdBy) {
 		try {
-			PreparedStatement statement = (PreparedStatement) this.connection
-					.prepareStatement("SELECT Id, Name, X, Y, Z, CreatedBy, World FROM worldteles WHERE CreatedBy = ?");
+			PreparedStatement statement = createStatement("SELECT Id, Name, X, Y, Z, CreatedBy, World FROM worldteles WHERE CreatedBy = ?");
 			statement.setString(1, createdBy);
 			ResultSet results = statement.executeQuery();
-			List<WorldTeleportModel> wtmList = new ArrayList<WorldTeleportModel>();
+			List<WorldTeleportEntity> wtmList = new ArrayList<WorldTeleportEntity>();
 			while (results.next()) {
-				WorldTeleportModel model = new WorldTeleportModel();
-
-				model.Id = results.getInt(1);
-				model.Name = results.getString(2);
-				model.X = results.getDouble(3);
-				model.Y = results.getDouble(4);
-				model.Z = results.getDouble(5);
-				model.CreatedBy = results.getString(6);
-				model.World = results.getString(7);
-
-				wtmList.add(model);
+				wtmList.add(convert(results));
 			}
 
 			return wtmList;
@@ -124,22 +120,14 @@ public class WorldTeleportRepository extends BaseRepository<WorldTeleportModel> 
 	}
 
 	@Override
-	public WorldTeleportModel Get(int id) {
+	public WorldTeleportEntity get(int id) {
 		try {
-			PreparedStatement statement = (PreparedStatement) this.connection
-					.prepareStatement("SELECT Id, Name, X, Y, Z, CreatedBy, World FROM worldteles WHERE Id = ?");
+			PreparedStatement statement = createStatement("SELECT Id, Name, X, Y, Z, CreatedBy, World FROM worldteles WHERE Id = ?");
 			statement.setInt(1, id);
 			ResultSet results = statement.executeQuery();
-			WorldTeleportModel model = null;
+			WorldTeleportEntity model = null;
 			while (results.next()) {
-				model = new WorldTeleportModel();
-				model.Id = results.getInt(1);
-				model.Name = results.getString(2);
-				model.X = results.getDouble(3);
-				model.Y = results.getDouble(4);
-				model.Z = results.getDouble(5);
-				model.CreatedBy = results.getString(6);
-				model.World = results.getString(7);
+				model = convert(results);
 			}
 
 			return model;
@@ -150,22 +138,14 @@ public class WorldTeleportRepository extends BaseRepository<WorldTeleportModel> 
 		return null;
 	}
 
-	public WorldTeleportModel Get(String name) {
+	public WorldTeleportEntity Get(String name) {
 		try {
-			PreparedStatement statement = (PreparedStatement) this.connection
-					.prepareStatement("SELECT Id, Name, X, Y, Z, CreatedBy, World FROM worldteles WHERE Name = ?");
+			PreparedStatement statement = createStatement("SELECT Id, Name, X, Y, Z, CreatedBy, World FROM worldteles WHERE Name = ?");
 			statement.setString(1, name);
 			ResultSet results = statement.executeQuery();
-			WorldTeleportModel model = null;
+			WorldTeleportEntity model = null;
 			while (results.next()) {
-				model = new WorldTeleportModel();
-				model.Id = results.getInt(1);
-				model.Name = results.getString(2);
-				model.X = results.getDouble(3);
-				model.Y = results.getDouble(4);
-				model.Z = results.getDouble(5);
-				model.CreatedBy = results.getString(6);
-				model.World = results.getString(7);
+				model = convert(results);
 			}
 
 			return model;
@@ -175,4 +155,19 @@ public class WorldTeleportRepository extends BaseRepository<WorldTeleportModel> 
 		}
 		return null;
 	}
+
+	private WorldTeleportEntity convert(ResultSet rs) throws SQLException {
+		WorldTeleportEntity model = new WorldTeleportEntity();
+
+		model.setId(rs.getInt("Id"));
+		model.setName(rs.getString("Name"));
+		model.setX(rs.getDouble("X"));
+		model.setY(rs.getDouble("Y"));
+		model.setZ(rs.getDouble("Z"));
+		model.setCreatedBy(rs.getString("CreatedBy"));
+		model.setWorld(rs.getString("World"));
+
+		return model;
+	}
+
 }

@@ -1,5 +1,5 @@
 name: WorldTeles
-main: com.dapper.worldteles.Main
+main: com.dapper.worldteles.WorldTelePlugin
 version: 1.0 (alpha)
 commands:
   wtslist:

@@ -1,0 +1,4 @@
+datasource:
+  url: jdbc:mysql://lcoalhost:3306/worldtele
+  username: root
+  password:

@@ -2,12 +2,20 @@ package com.dapper.worldteles.repositories;
 
 import java.util.List;
 
+/**
+ * Repository to interact with a database
+ * @param <T>
+ */
 public interface IRepository<T> {
-	T Add(T item);
 
-	boolean Remove(int id);
+	T findByName(String name);
 
-	List<T> All();
+	T add(T item);
 
-	T Get(int id);
+	boolean remove(int id);
+
+	List<T> all();
+
+	T get(int id);
+
 }
