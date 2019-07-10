@@ -1,51 +1,59 @@
 package com.dapper.worldteles.commands;
 
+import com.dapper.worldteles.repositories.IRepository;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import com.dapper.worldteles.models.WorldTeleportModel;
-import com.dapper.worldteles.repositories.WorldTeleportRepository;
+import com.dapper.worldteles.models.WorldTeleportEntity;
 
-public class AddCommand {
+public class AddCommand extends BaseCommand {
 
-	public boolean execute(CommandSender sender, String label, String[] args) {
-		if (!(sender instanceof Player)) {
-			return true;
-		}
+    public AddCommand(final IRepository<WorldTeleportEntity> repository) {
+        super(repository);
+    }
 
-		Player player = (Player) sender;
-		try {
-			Integer.parseInt(args[0]);
-			player.sendMessage(ChatColor.RED + "The name cannot be a number");
+    @Override
+    public boolean onCommand(final CommandSender sender, final Command command, final String label, final String[] args) {
+        if (!(sender instanceof Player)) {
+            return false;
+        }
 
-			return true;
-		} catch (NumberFormatException ex) {
+        if (args.length != 1) {
+            return false;
+        }
 
-		}
+        Player player = (Player) sender;
+        try {
+            Integer.parseInt(args[0]);
+            player.sendMessage(ChatColor.RED + "The name cannot be a number");
 
-		WorldTeleportRepository repo = new WorldTeleportRepository();
+            return false;
+        } catch (NumberFormatException ex) {
 
-		if (repo.Get(args[0]) != null) {
-			player.sendMessage(ChatColor.RED + "Teleport with this name already exists");
-			return true;
-		}
+        }
 
-		Location loc = player.getLocation();
-		WorldTeleportModel model = new WorldTeleportModel();
+        if (repository.findByName(args[0]) != null) {
+            player.sendMessage(ChatColor.RED + "Teleport with this name already exists");
+            return false;
+        }
 
-		model.X = loc.getX();
-		model.Y = loc.getY();
-		model.Z = loc.getZ();
-		model.CreatedBy = player.getUniqueId().toString();
-		model.Name = args[0];
-		model.World = loc.getWorld().getName();
+        Location loc = player.getLocation();
+        WorldTeleportEntity model = new WorldTeleportEntity();
 
-		repo.Add(model);
+        model.setX(loc.getX());
+        model.setY(loc.getY());
+        model.setZ(loc.getZ());
+        model.setCreatedBy(player.getUniqueId().toString());
+        model.setName(args[0]);
+        model.setWorld(loc.getWorld().getName());
 
-		player.sendMessage(ChatColor.GREEN + "Successfully added the " + args[0] + " world teleport");
+        repository.add(model);
 
-		return true;
-	}
+        player.sendMessage(ChatColor.GREEN + "Successfully added the " + args[0] + " world teleport");
+
+        return true;
+    }
 }

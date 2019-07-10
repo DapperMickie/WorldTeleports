@@ -1,51 +1,50 @@
 package com.dapper.worldteles.commands;
 
+import com.dapper.worldteles.models.WorldTeleportEntity;
+import com.dapper.worldteles.repositories.IRepository;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import com.dapper.worldteles.models.WorldTeleportModel;
-import com.dapper.worldteles.repositories.WorldTeleportRepository;
+public class TeleCommand extends BaseCommand {
 
-import net.md_5.bungee.api.ChatColor;
+    public TeleCommand(final IRepository<WorldTeleportEntity> repository) {
+        super(repository);
+    }
 
-public class TeleCommand {
+    @Override
+    public boolean onCommand(final CommandSender sender, final Command command, final String label, final String[] args) {
+        if (!(sender instanceof Player)) {
 
-	public boolean execute(CommandSender sender, String label, String[] args) {
+            return false;
+        }
 
-		if (!(sender instanceof Player)) {
+        Player player = (Player) sender;
 
-			return true;
-		}
+        if (args.length <= 0) {
+            return false;
+        }
 
-		Player player = (Player) sender;
+        WorldTeleportEntity model;
 
-		if (args.length <= 0) {
-			return true;
-		}
+        try {
 
-		WorldTeleportRepository repo = new WorldTeleportRepository();
-		WorldTeleportModel model;
+            int id = Integer.parseInt(args[0]);
+            model = repository.get(id);
 
-		try {
+        } catch (NumberFormatException ex) {
 
-			int id = Integer.parseInt(args[0]);
-			model = repo.Get(id);
+            model = repository.findByName(args[0]);
+        }
 
-		} catch (NumberFormatException ex) {
+        World world = Bukkit.getServer().getWorld(model.getWorld());
+        player.teleport(new Location(world, model.getX(), model.getY(), model.getZ()));
+        player.sendMessage(ChatColor.GREEN + "Successfully teleported to " + args[0]);
 
-			model = repo.Get(args[0]);
-		}
-
-		World world = Bukkit.getServer().getWorld(model.World);
-
-		player.teleport(new Location(world, model.X, model.Y, model.Z));
-
-		player.sendMessage(ChatColor.GREEN + "Successfully teleported to " + args[0]);
-
-		return true;
-	}
-
+        return true;
+    }
 }

@@ -1,39 +1,50 @@
 package com.dapper.worldteles.commands;
 
+import com.dapper.worldteles.models.WorldTeleportEntity;
+import com.dapper.worldteles.repositories.IRepository;
 import org.bukkit.ChatColor;
+import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import com.dapper.worldteles.repositories.WorldTeleportRepository;
+public class RemoveCommand extends BaseCommand {
 
-public class RemoveCommand {
+    public RemoveCommand(final IRepository<WorldTeleportEntity> repository) {
+        super(repository);
+    }
 
-	public boolean execute(CommandSender sender, String label, String[] args) {
+    @Override
+    public boolean onCommand(final CommandSender sender, final Command command, final String label, final String[] args) {
+        if (!(sender instanceof Player)) {
+            return false;
+        }
 
-		Player player = (Player) sender;
-		if (!(sender instanceof Player)) {
-			return true;
-		}
+        if (args.length != 1) {
+            return false;
+        }
 
-		if (args.length <= 0) {
-			return true;
-		}
+        try {
 
-		WorldTeleportRepository repo = new WorldTeleportRepository();
+            int id = Integer.parseInt(args[0]);
+            removeById(sender, id);
+        } catch (NumberFormatException ex) {
 
-		try {
+            removeByName(sender, args[0]);
+        }
 
-			int id = Integer.parseInt(args[0]);
-			repo.Remove(id);
-			player.sendMessage(ChatColor.GREEN + "Succesfully removed world teleport with id: " + id);
+        return true;
+    }
 
-		} catch (NumberFormatException ex) {
+    private void removeById(CommandSender sender, final int id) {
 
-			repo.Remove(args[0]);
-			player.sendMessage(ChatColor.GREEN + "Succesfully removed world teleport with name: " + args[0]);
-		}
+        sender.sendMessage(ChatColor.GREEN + "Succesfully removed world teleport with id: " + id);
+    }
 
-		return true;
-	}
+    private void removeByName(CommandSender sender, final String name) {
+
+        final WorldTeleportEntity model = repository.findByName(name);
+        repository.remove(model.getId());
+        sender.sendMessage(ChatColor.GREEN + "Succesfully removed world teleport with name: " + name);
+    }
 
 }
