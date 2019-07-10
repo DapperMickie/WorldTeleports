@@ -24,7 +24,10 @@ public class WorldTeleportRepository extends BaseRepository<WorldTeleportEntity>
 
 			final ResultSet result = stmt.executeQuery();
 
-			result.next();
+			if (!result.next()) {
+				return null;
+			}
+
 			return convert(result);
 		} catch (SQLException e) {
 			throw new RuntimeException(e);

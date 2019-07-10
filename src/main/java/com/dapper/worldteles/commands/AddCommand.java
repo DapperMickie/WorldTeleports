@@ -21,6 +21,10 @@ public class AddCommand extends BaseCommand {
             return false;
         }
 
+        if (args.length != 1) {
+            return false;
+        }
+
         Player player = (Player) sender;
         try {
             Integer.parseInt(args[0]);
